@@ -1,0 +1,10 @@
+Hello {{ business_name }} team,
+
+{{ intro }}
+
+{% for label, value in rows %}{{ label }}: {{ value }}
+{% endfor %}
+{{ advice }}
+
+Open SmartShelf AI to view the inventory batch:
+{{ batch_url }}

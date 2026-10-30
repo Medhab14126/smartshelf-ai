@@ -1,0 +1,82 @@
+# SmartShelf AI – local stack.
+#   docker compose up --build            -> db, mailpit, backend, frontend
+#   docker compose --profile ai up -d    -> additionally starts Ollama (see README for model download)
+name: smartshelf
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-smartshelf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-smartshelf}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "8025:8025"   # web UI
+      - "1025:1025"   # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_PADDLEOCR: ${INSTALL_PADDLEOCR:-false}
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-smartshelf}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-smartshelf}
+      SMTP_HOST: ${DOCKER_SMTP_HOST:-mailpit}
+      SMTP_PORT: ${DOCKER_SMTP_PORT:-1025}
+      OLLAMA_BASE_URL: ${DOCKER_OLLAMA_BASE_URL:-http://ollama:11434}
+      UPLOAD_DIR: /data/uploads
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:8080}
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    volumes:
+      - uploads:/data/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+  ollama:
+    image: ollama/ollama:0.6.8
+    profiles: ["ai"]
+    volumes:
+      - ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+
+volumes:
+  pgdata:
+  uploads:
+  ollama:

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ subject }}</title></head>
+<body style="margin:0;padding:0;background:#f4f5f2;font-family:Segoe UI,Helvetica,Arial,sans-serif;color:#1f2a24;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f2;padding:24px 0;">
+    <tr><td align="center">
+      <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e3e6e0;">
+        <tr><td style="background:{{ accent }};padding:18px 24px;color:#ffffff;font-size:18px;font-weight:600;">
+          SmartShelf AI · {{ business_name }}
+        </td></tr>
+        <tr><td style="padding:24px;">
+          <p style="margin:0 0 12px;font-size:16px;">Hello {{ business_name }} team,</p>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">{{ intro }}</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;border-collapse:collapse;">
+            {% for label, value in rows %}
+            <tr>
+              <td style="padding:8px 0;border-bottom:1px solid #eef0ec;color:#5b665f;width:42%;">{{ label }}</td>
+              <td style="padding:8px 0;border-bottom:1px solid #eef0ec;font-weight:600;">{{ value }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          <p style="margin:20px 0;font-size:15px;line-height:1.5;">{{ advice }}</p>
+          <p style="margin:0 0 8px;">
+            <a href="{{ batch_url }}" style="display:inline-block;background:{{ accent }};color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600;">Open SmartShelf AI to view the batch</a>
+          </p>
+        </td></tr>
+        <tr><td style="padding:14px 24px;background:#fafbf9;color:#7b857e;font-size:12px;">
+          You receive this email because you are listed as a notification recipient for {{ business_name }}.
+          Reminder intervals and recipients can be changed in Settings.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
